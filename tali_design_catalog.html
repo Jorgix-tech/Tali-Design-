@@ -25,6 +25,25 @@
               rose: { 50: '#fff1f2', 100: '#ffe4e6', 200: '#fecdd3', 300: '#fda4af', 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c', 800: '#9f1239', 900: '#881337', },
               orange: { 50: '#fff7ed', },
               slate: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a', }
+            },
+            keyframes: {
+              'toast-in': {
+                '0%': { transform: 'translateY(100%)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
+              'fade-in': {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              'scale-in': {
+                '0%': { transform: 'scale(0.95)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' },
+              }
+            },
+            animation: {
+              'toast-in': 'toast-in 0.3s ease-out forwards',
+              'fade-in': 'fade-in 0.2s ease-out forwards',
+              'scale-in': 'scale-in 0.2s ease-out forwards',
             }
           }
         }
@@ -51,7 +70,7 @@
       }
     </style>
 </head>
-<body class="bg-gradient-to-br from-rose-50 to-orange-50 text-slate-900 selection:bg-rose-200">
+<body class="bg-gradient-to-br from-rose-50 to-orange-50 text-slate-900 selection:bg-rose-200 overflow-x-hidden">
 
     <div id="root"></div>
 
@@ -75,7 +94,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // System Constants
         const SYS_APP_ID = 'tali-catalog-production';
 
         const getCol = (colName) => db.collection(`artifacts/${SYS_APP_ID}/public/data/${colName}`);
@@ -96,11 +114,19 @@
                 'file-down': <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="M9 15l3 3 3-3" /></>,
                 'external-link': <><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></>,
                 'wifi': <><path d="M5 12.55a11 11 0 0 1 14.08 0" /><path d="M1.42 9a16 16 0 0 1 21.16 0" /><path d="M8.53 16.11a6 6 0 0 1 6.95 0" /><line x1="12" y1="20" x2="12.01" y2="20" /></>,
-                'wifi-off': <><line x1="2" y1="2" x2="22" y2="22" /><path d="M8.5 16.5a5 5 0 0 1 7 0" /><path d="M2 8.82a15 15 0 0 1 4.17-2.65" /><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76" /><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68" /><path d="M5 13a10 10 0 0 1 5.24-2.76" /><line x1="12" y1="20" x2="12.01" y2="20" /></>
+                'wifi-off': <><line x1="2" y1="2" x2="22" y2="22" /><path d="M8.5 16.5a5 5 0 0 1 7 0" /><path d="M2 8.82a15 15 0 0 1 4.17-2.65" /><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76" /><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68" /><path d="M5 13a10 10 0 0 1 5.24-2.76" /><line x1="12" y1="20" x2="12.01" y2="20" /></>,
+                'map-pin': <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></>,
+                'phone': <><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></>,
+                'instagram': <><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></>,
+                'facebook': <><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></>,
+                'check-circle': <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>,
+                'alert-circle': <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>,
+                'alert-triangle': <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>,
+                'x': <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
             };
             return (
                 <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', width: '1em', height: '1em' }}>
-                    {paths[name]}
+                    {paths[name] || paths['settings']}
                 </svg>
             );
         };
@@ -122,28 +148,49 @@
             const [view, setView] = useState('catalog');
             const [adminTab, setAdminTab] = useState('products');
             const [isPrinting, setIsPrinting] = useState(false);
+            
+            // --- UI Interrupt States ---
+            const [toast, setToast] = useState(null);
+            // Safety Interlock Modal State
+            const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: '', message: '', action: null });
 
-            const [settings, setSettings] = useState({ title: 'TALI - קטלוג דיגיטלי', id: null });
+            // Payload structures
+            const [settings, setSettings] = useState({ 
+                title: '', id: null, logo: null, address: '', whatsapp: '', instagram: '', facebook: '' 
+            });
             const [catalogs, setCatalogs] = useState([]);
             const [products, setProducts] = useState([]);
             const [activeCatalogId, setActiveCatalogId] = useState(null);
 
+            // Buffers
             const [folderFormName, setFolderFormName] = useState('');
-            const [siteTitleForm, setSiteTitleForm] = useState('');
+            const [settingsForm, setSettingsForm] = useState({
+                title: '', logo: null, address: '', whatsapp: '', instagram: '', facebook: ''
+            });
             const [formData, setFormData] = useState({
                 catalogId: '', title: '', description: '', price: '', link: '', image: null
             });
             const [isSubmitting, setIsSubmitting] = useState(false);
             const fileInputRef = useRef(null);
+            const logoInputRef = useRef(null);
 
-            // --- Auth & Connection Monitor ---
+            // --- Async Notification Engine (Non-blocking I/O) ---
+            const showToast = (message, type = 'success') => {
+                const id = Date.now();
+                setToast({ id, message, type });
+                setTimeout(() => {
+                    setToast(prev => prev && prev.id === id ? null : prev);
+                }, 3000); // 3-second hardware wipe
+            };
+
+            // --- Rx (Receive) Logic ---
             useEffect(() => {
                 auth.signInAnonymously()
                     .then(() => setIsOnline(true))
                     .catch((err) => {
-                        console.error('Critical Auth Failure:', err);
                         setIsOnline(false);
-                        alert('כשל תקשורת לשרת Firebase: \n1. ודא ש-Anonymous Auth מופעל.\n2. חומת האש בארגון חוסמת את הבקשה.\n\nקוד שגיאה: ' + err.code);
+                        console.error('Auth Init Error:', err);
+                        showToast('כשל תקשורת לשרת: ודא חיבור או הגדרות ענן', 'error');
                     });
                 
                 const unsubscribe = auth.onAuthStateChanged(usr => {
@@ -153,24 +200,31 @@
                 return () => unsubscribe();
             }, []);
 
-            // --- Rx Streams with Strict Error Handling ---
             useEffect(() => {
                 if (!user) return;
 
                 const handleRxError = (err) => {
-                    console.error("Firebase Rx Error:", err);
                     setIsOnline(false);
                     if(err.code === 'permission-denied') {
-                        alert("חסימה בערוץ הנתונים (Permission Denied)!\nעליך להגדיר את חוקי ה-Firestore בדיוק לפי ההוראות. המערכת עובדת כרגע ב-Offline Mode.");
+                        showToast("חסימת הרשאות: נדחתה קריאה ממסד הנתונים", "error");
                     }
                 };
 
                 const unsubSettings = getCol('site_settings').onSnapshot((snapshot) => {
                     setIsOnline(true);
                     if (!snapshot.empty) {
-                        const docData = snapshot.docs[0];
-                        setSettings({ id: docData.id, ...docData.data() });
-                        setSiteTitleForm(docData.data().title || 'TALI - קטלוג דיגיטלי');
+                        const docData = snapshot.docs[0].data();
+                        const dataId = snapshot.docs[0].id;
+                        setSettings({ id: dataId, ...docData });
+                        
+                        setSettingsForm({
+                            title: docData.title || '',
+                            logo: docData.logo || null,
+                            address: docData.address || '',
+                            whatsapp: docData.whatsapp || '',
+                            instagram: docData.instagram || '',
+                            facebook: docData.facebook || ''
+                        });
                     }
                 }, handleRxError);
 
@@ -211,27 +265,24 @@
                 if (pinInput === '1234') {
                     setIsAdminAuthenticated(true);
                     setPinInput('');
+                    showToast('אימות הצליח: גישת ניהול אושרה', 'success');
                 } else {
-                    alert('שגיאת אימות: סיסמה שגויה');
+                    showToast('שגיאת אימות: גישה נדחתה', 'error');
                 }
             };
 
-            const handleImageUpload = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
+            const processImageUpload = (file, maxWidth, callback) => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 800;
                         let width = img.width;
                         let height = img.height;
 
-                        if (width > MAX_WIDTH) {
-                            height = Math.round((height * MAX_WIDTH) / width);
-                            width = MAX_WIDTH;
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
                         }
 
                         canvas.width = width;
@@ -239,27 +290,40 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                        setFormData(prev => ({ ...prev, image: compressedBase64 }));
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                        callback(compressedBase64);
                     };
                     img.src = event.target.result;
                 };
                 reader.readAsDataURL(file);
             };
 
-            // --- Tx Wrappers for Robust Error Handling ---
+            const handleImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                processImageUpload(file, 800, (base64) => setFormData(prev => ({ ...prev, image: base64 })));
+            };
+
+            const handleLogoUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                processImageUpload(file, 400, (base64) => setSettingsForm(prev => ({ ...prev, logo: base64 })));
+            };
+
+            // --- Tx (Transmit) Pipelines ---
             const txWrapper = async (txFunction, actionName) => {
                 if (!user || !isOnline) {
-                    alert('המערכת כרגע בסטטוס אופליין או שגיאת הרשאות. לא ניתן לבצע מניפולציות בנתונים.');
+                    showToast('שגיאת רשת: המערכת אינה מחוברת לענן', 'error');
                     return false;
                 }
                 setIsSubmitting(true);
                 try {
                     await txFunction();
+                    showToast(`${actionName} בוצעה בהצלחה`, 'success');
                     return true;
                 } catch (err) {
                     console.error(`Tx Error [${actionName}]:`, err);
-                    alert(`כשל בשמירת הנתונים בענן!\nהפעולה: ${actionName}\nקוד שגיאה: ${err.code}\n\nבדוק הרשאות מסד נתונים (Rules).`);
+                    showToast(`כשל בעת ${actionName}: ${err.message}`, 'error');
                     return false;
                 } finally {
                     setIsSubmitting(false);
@@ -268,11 +332,11 @@
 
             const updateSettings = async (e) => {
                 e.preventDefault();
-                if (!siteTitleForm) return;
+                // Tx Gate opened: Title is no longer mandatory to save settings.
                 await txWrapper(async () => {
-                    if (settings.id) await getDoc('site_settings', settings.id).update({ title: siteTitleForm });
-                    else await getCol('site_settings').add({ title: siteTitleForm });
-                }, 'עדכון כותרת');
+                    if (settings.id) await getDoc('site_settings', settings.id).update({ ...settingsForm });
+                    else await getCol('site_settings').add({ ...settingsForm });
+                }, 'שמירת הגדרות העסק');
             };
 
             const addFolder = async (e) => {
@@ -280,23 +344,34 @@
                 if (!folderFormName) return;
                 const success = await txWrapper(async () => {
                     await getCol('catalogs').add({ name: folderFormName, isVisible: true, timestamp: Date.now() });
-                }, 'יצירת תיקייה');
+                }, 'יצירת התיקייה');
                 if (success) setFolderFormName('');
             };
 
             const toggleFolderVisibility = async (id, currentVisibility) => {
                 await txWrapper(async () => {
                     await getDoc('catalogs', id).update({ isVisible: !currentVisibility });
-                }, 'שינוי תצוגת תיקייה');
+                }, 'עדכון מצב תצוגה');
             };
 
-            const deleteFolder = async (id) => {
+            // --- Safety Interlock Handlers (Modals) ---
+            const requestDeleteFolder = (id, name) => {
                 const hasProducts = products.some(p => p.catalogId === id);
-                if (hasProducts) { alert('כשל לוגי: לא ניתן למחוק תיקייה המכילה מוצרים.'); return; }
-                const success = await txWrapper(async () => {
-                    await getDoc('catalogs', id).delete();
-                }, 'מחיקת תיקייה');
-                if (success && activeCatalogId === id) setActiveCatalogId(null);
+                if (hasProducts) { 
+                    showToast('מחיקה נדחתה: התיקייה מכילה פריטים', 'error'); 
+                    return; 
+                }
+                setConfirmDialog({
+                    isOpen: true,
+                    title: 'מחיקת קטלוג',
+                    message: `האם אתה בטוח שברצונך למחוק את הקטלוג "${name}"? הפעולה אינה הפיכה והנתונים יימחקו מידית מהענן.`,
+                    action: async () => {
+                        const success = await txWrapper(async () => {
+                            await getDoc('catalogs', id).delete();
+                        }, 'מחיקת התיקייה');
+                        if (success && activeCatalogId === id) setActiveCatalogId(null);
+                    }
+                });
             };
 
             const handleProductSubmit = async (e) => {
@@ -304,7 +379,7 @@
                 if (!formData.title || !formData.image || !formData.catalogId) return;
                 const success = await txWrapper(async () => {
                     await getCol('catalog_products').add({ ...formData, timestamp: Date.now() });
-                }, 'הוספת מוצר חדש');
+                }, 'הוספת המוצר');
                 
                 if (success) {
                     setFormData({ catalogId: formData.catalogId, title: '', description: '', price: '', link: '', image: null });
@@ -312,10 +387,17 @@
                 }
             };
 
-            const deleteProduct = async (id) => {
-                await txWrapper(async () => {
-                    await getDoc('catalog_products', id).delete(); 
-                }, 'מחיקת מוצר');
+            const requestDeleteProduct = (id, title) => {
+                setConfirmDialog({
+                    isOpen: true,
+                    title: 'מחיקת מוצר',
+                    message: `האם למחוק את המוצר "${title}" מקטלוג המערכת? הפעולה אינה הפיכה.`,
+                    action: async () => {
+                        await txWrapper(async () => {
+                            await getDoc('catalog_products', id).delete(); 
+                        }, 'מחיקת המוצר');
+                    }
+                });
             };
 
             const handlePrint = () => {
@@ -326,6 +408,7 @@
                 }, 500);
             };
 
+            // --- UI Rendering ---
             if (loading) {
                 return (
                     <div className="flex h-screen w-full items-center justify-center bg-rose-50 dir-rtl">
@@ -343,11 +426,59 @@
             return (
                 <div className="min-h-screen relative pb-10">
                     
+                    {/* --- Notification Toast Overlay --- */}
+                    {toast && (
+                        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[100] animate-toast-in print-hidden">
+                            <div className={`flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl text-white font-medium ${toast.type === 'success' ? 'bg-slate-900' : 'bg-red-600'}`}>
+                                <SvgIcon name={toast.type === 'success' ? 'check-circle' : 'alert-circle'} className="w-5 h-5" />
+                                {toast.message}
+                                <button onClick={() => setToast(null)} className="mr-4 hover:opacity-75 focus:outline-none">
+                                    <SvgIcon name="x" className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- Safety Interlock Confirmation Modal --- */}
+                    {confirmDialog.isOpen && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center print-hidden bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+                            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 animate-scale-in">
+                                <div className="flex items-center gap-4 text-red-600 mb-4">
+                                    <div className="bg-red-50 p-3 rounded-full">
+                                        <SvgIcon name="alert-triangle" className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900">{confirmDialog.title}</h3>
+                                </div>
+                                <p className="text-slate-600 mb-8 leading-relaxed">{confirmDialog.message}</p>
+                                <div className="flex gap-4 justify-end">
+                                    <button 
+                                        onClick={() => setConfirmDialog({ isOpen: false, title: '', message: '', action: null })}
+                                        className="px-6 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300"
+                                    >
+                                        ביטול
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            if(confirmDialog.action) confirmDialog.action();
+                                            setConfirmDialog({ isOpen: false, title: '', message: '', action: null });
+                                        }}
+                                        className="px-6 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-md shadow-red-600/20 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    >
+                                        אשר מחיקה
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {!isPrinting && (
                         <nav className="bg-white/90 backdrop-blur-md shadow-sm border-b border-rose-100 sticky top-0 z-50 print-hidden">
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                                 <div className="flex justify-between h-16 items-center">
-                                    <h1 className="text-xl font-serif font-bold text-slate-800 tracking-tight">{settings.title}</h1>
+                                    <h1 className="text-xl font-serif font-bold text-slate-800 tracking-tight flex items-center gap-3">
+                                        {settings.logo && <img src={settings.logo} alt="Logo" className="h-8 w-8 object-contain rounded" />}
+                                        {settings.title || 'קטלוג דיגיטלי'}
+                                    </h1>
                                     <div className="flex space-x-2 space-x-reverse items-center">
                                         <button onClick={() => { setView('catalog'); setIsAdminAuthenticated(false); }} className={`px-4 py-2 rounded-md transition-colors font-medium ${view === 'catalog' ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-600 hover:bg-rose-50'}`}>תצוגת לקוח</button>
                                         <button onClick={() => setView('admin')} className={`px-4 py-2 rounded-md transition-colors font-medium flex items-center gap-2 ${view === 'admin' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
@@ -363,10 +494,10 @@
                         <div className="bg-slate-900 text-slate-300 text-xs py-1 px-4 flex justify-between items-center print-hidden">
                             <span>Telemetry Status:</span>
                             <div className="flex items-center gap-2">
-                                <span className="font-mono">{user ? `UID: ${user.uid.slice(0,6)}...` : 'Unauthenticated'}</span>
+                                <span className="font-mono">{user ? `UID: ${user.uid.slice(0,6)}...` : 'Unauth'}</span>
                                 {isOnline ? 
-                                    <span className="flex items-center text-green-400 gap-1"><SvgIcon name="wifi" className="w-3 h-3" /> Online Tx/Rx</span> : 
-                                    <span className="flex items-center text-red-400 gap-1"><SvgIcon name="wifi-off" className="w-3 h-3" /> Offline (DB Sync Failed)</span>
+                                    <span className="flex items-center text-green-400 gap-1"><SvgIcon name="wifi" className="w-3 h-3" /> Online</span> : 
+                                    <span className="flex items-center text-red-400 gap-1"><SvgIcon name="wifi-off" className="w-3 h-3" /> Offline</span>
                                 }
                             </div>
                         </div>
@@ -386,26 +517,77 @@
                                         <p className="text-slate-500 mb-6">הזן סיסמה (1234)</p>
                                         <form onSubmit={handlePinSubmit} className="space-y-4">
                                             <input type="password" value={pinInput} onChange={(e) => setPinInput(e.target.value)} placeholder="..." className="w-full text-center text-2xl tracking-widest p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none" autoFocus />
-                                            <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-4 rounded-xl transition-all">כניסה למערכת</button>
+                                            <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-4 rounded-xl transition-all">כניסה</button>
                                         </form>
                                     </div>
                                 ) : (
                                     <div className="space-y-8">
                                         {/* Admin Tabs Router */}
-                                        <div className="flex border-b border-slate-300 space-x-8 space-x-reverse mb-8 pb-px">
-                                            <button onClick={() => setAdminTab('products')} className={`pb-4 text-lg font-medium transition-colors relative ${adminTab === 'products' ? 'text-rose-600' : 'text-slate-500 hover:text-slate-700'}`}>ניהול מוצרים {adminTab === 'products' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600 rounded-t-full"></span>}</button>
-                                            <button onClick={() => setAdminTab('folders')} className={`pb-4 text-lg font-medium transition-colors relative ${adminTab === 'folders' ? 'text-rose-600' : 'text-slate-500 hover:text-slate-700'}`}>קטלוגים {adminTab === 'folders' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600 rounded-t-full"></span>}</button>
-                                            <button onClick={() => setAdminTab('settings')} className={`pb-4 text-lg font-medium transition-colors relative ${adminTab === 'settings' ? 'text-rose-600' : 'text-slate-500 hover:text-slate-700'}`}>הגדרות {adminTab === 'settings' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600 rounded-t-full"></span>}</button>
+                                        <div className="flex border-b border-slate-300 space-x-8 space-x-reverse mb-8 pb-px overflow-x-auto">
+                                            <button onClick={() => setAdminTab('products')} className={`pb-4 text-lg font-medium transition-colors whitespace-nowrap relative ${adminTab === 'products' ? 'text-rose-600' : 'text-slate-500 hover:text-slate-700'}`}>ניהול מוצרים {adminTab === 'products' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600 rounded-t-full"></span>}</button>
+                                            <button onClick={() => setAdminTab('folders')} className={`pb-4 text-lg font-medium transition-colors whitespace-nowrap relative ${adminTab === 'folders' ? 'text-rose-600' : 'text-slate-500 hover:text-slate-700'}`}>קטלוגים {adminTab === 'folders' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600 rounded-t-full"></span>}</button>
+                                            <button onClick={() => setAdminTab('settings')} className={`pb-4 text-lg font-medium transition-colors whitespace-nowrap relative ${adminTab === 'settings' ? 'text-rose-600' : 'text-slate-500 hover:text-slate-700'}`}>הגדרות העסק {adminTab === 'settings' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600 rounded-t-full"></span>}</button>
                                         </div>
 
                                         {adminTab === 'settings' && (
-                                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-2xl">
-                                                <h3 className="text-xl font-bold mb-6 flex items-center text-slate-800"><SvgIcon name="edit-2" className="ml-2 w-5 h-5 text-rose-500" /> כותרת ראשית</h3>
-                                                <form onSubmit={updateSettings} className="space-y-4">
-                                                    <input type="text" value={siteTitleForm} onChange={(e) => setSiteTitleForm(e.target.value)} className="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500" />
-                                                    <button type="submit" disabled={isSubmitting} className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-8 rounded-xl disabled:opacity-50">
-                                                        {isSubmitting ? 'מעדכן...' : 'שמור'}
-                                                    </button>
+                                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-4xl">
+                                                <h3 className="text-xl font-bold mb-6 flex items-center text-slate-800"><SvgIcon name="edit-2" className="ml-2 w-5 h-5 text-rose-500" /> הגדרות העסק (Contact & Identity)</h3>
+                                                <form onSubmit={updateSettings} className="space-y-6">
+                                                    
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        <div className="space-y-4">
+                                                            <div>
+                                                                <label className="block text-sm font-bold text-slate-700 mb-1">כותרת העסק (אופציונלי)</label>
+                                                                <input type="text" value={settingsForm.title} onChange={(e) => setSettingsForm({...settingsForm, title: e.target.value})} className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 font-serif" />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-sm font-bold text-slate-700 mb-1">כתובת פיזית</label>
+                                                                <div className="flex gap-2">
+                                                                    <div className="flex items-center justify-center bg-slate-100 p-3 rounded-xl border border-slate-300"><SvgIcon name="map-pin" className="w-5 h-5 text-slate-500"/></div>
+                                                                    <input type="text" placeholder="לדוג': רומא 11, אזור תעשייה שדרות" value={settingsForm.address} onChange={(e) => setSettingsForm({...settingsForm, address: e.target.value})} className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500" />
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-sm font-bold text-slate-700 mb-1">לוגו (מומלץ PNG שקוף)</label>
+                                                                <label className="flex items-center justify-center w-full h-20 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                                                                    <div className="flex items-center gap-3">
+                                                                        {settingsForm.logo ? <img src={settingsForm.logo} alt="Logo Preview" className="h-12 w-auto object-contain" /> : <><SvgIcon name="image" className="w-6 h-6 text-slate-400" /><span className="text-sm font-medium text-slate-500">העלה לוגו</span></>}
+                                                                    </div>
+                                                                    <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} ref={logoInputRef} />
+                                                                </label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-4">
+                                                            <div>
+                                                                <label className="block text-sm font-bold text-slate-700 mb-1">מספר וואטסאפ (WhatsApp)</label>
+                                                                <div className="flex gap-2">
+                                                                    <div className="flex items-center justify-center bg-green-50 p-3 rounded-xl border border-green-200"><SvgIcon name="phone" className="w-5 h-5 text-green-600"/></div>
+                                                                    <input type="text" placeholder="קישור לווטסאפ (לדוג': wa.me/97250...)" value={settingsForm.whatsapp} onChange={(e) => setSettingsForm({...settingsForm, whatsapp: e.target.value})} className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 text-left" dir="ltr" />
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-sm font-bold text-slate-700 mb-1">אינסטגרם (Instagram)</label>
+                                                                <div className="flex gap-2">
+                                                                    <div className="flex items-center justify-center bg-pink-50 p-3 rounded-xl border border-pink-200"><SvgIcon name="instagram" className="w-5 h-5 text-pink-600"/></div>
+                                                                    <input type="url" placeholder="https://instagram.com/..." value={settingsForm.instagram} onChange={(e) => setSettingsForm({...settingsForm, instagram: e.target.value})} className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 text-left" dir="ltr" />
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-sm font-bold text-slate-700 mb-1">פייסבוק (Facebook)</label>
+                                                                <div className="flex gap-2">
+                                                                    <div className="flex items-center justify-center bg-blue-50 p-3 rounded-xl border border-blue-200"><SvgIcon name="facebook" className="w-5 h-5 text-blue-600"/></div>
+                                                                    <input type="url" placeholder="https://facebook.com/..." value={settingsForm.facebook} onChange={(e) => setSettingsForm({...settingsForm, facebook: e.target.value})} className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 text-left" dir="ltr" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="pt-4 border-t border-slate-200">
+                                                        <button type="submit" disabled={isSubmitting} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-8 rounded-xl disabled:opacity-50 transition-colors shadow-lg">
+                                                            {isSubmitting ? 'משדר נתונים...' : 'שמור הגדרות עסק'}
+                                                        </button>
+                                                    </div>
                                                 </form>
                                             </div>
                                         )}
@@ -432,7 +614,7 @@
                                                                 <button onClick={() => toggleFolderVisibility(catalog.id, catalog.isVisible)} className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 ${catalog.isVisible ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
                                                                     <SvgIcon name={catalog.isVisible ? 'eye' : 'eye-off'} className="w-4 h-4" /> {catalog.isVisible ? 'מוצג' : 'מוסתר'}
                                                                 </button>
-                                                                <button onClick={() => deleteFolder(catalog.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg" title="מחק"><SvgIcon name="trash-2" className="w-5 h-5" /></button>
+                                                                <button onClick={() => requestDeleteFolder(catalog.id, catalog.name)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg" title="מחק"><SvgIcon name="trash-2" className="w-5 h-5" /></button>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -484,7 +666,7 @@
                                                                             <div className="flex-1 min-w-0">
                                                                                 <div className="flex justify-between items-start">
                                                                                     <h4 className="font-bold text-sm truncate">{product.title}</h4>
-                                                                                    <button onClick={() => deleteProduct(product.id)} className="text-red-400 hover:text-red-600 p-1" title="מחק"><SvgIcon name="trash-2" className="w-4 h-4" /></button>
+                                                                                    <button onClick={() => requestDeleteProduct(product.id, product.title)} className="text-red-400 hover:text-red-600 p-1" title="מחק"><SvgIcon name="trash-2" className="w-4 h-4" /></button>
                                                                                 </div>
                                                                                 <span className="font-bold text-rose-600 text-sm">{product.price ? `₪${product.price}` : ''}</span>
                                                                             </div>
@@ -505,21 +687,55 @@
                         {/* ================= PUBLIC VIEW (Client & Print) ================= */}
                         {(view === 'catalog' || isPrinting) && (
                             <div className="pb-20">
-                                <div className="text-center mb-12 pt-8 pb-10 print:mb-8 print:pt-0 print:pb-4 border-b-2 border-rose-900/10">
-                                    <div className="inline-block relative">
+                                <div className="text-center mb-12 pt-8 pb-10 border-b border-rose-900/10">
+                                    <div className="inline-block relative w-full">
                                         <div className="absolute -inset-x-8 -inset-y-12 text-[180px] font-serif text-rose-900/5 select-none pointer-events-none print:text-slate-100 z-0 flex items-center justify-center overflow-hidden">T</div>
-                                        <h1 className="relative z-10 text-4xl md:text-5xl font-serif font-extrabold text-slate-900 tracking-tight">{settings.title}</h1>
-                                        <p className="relative z-10 text-lg md:text-xl text-rose-700/80 mt-3 font-medium">רגעים קטנים של כתיבה</p>
+                                        
+                                        <div className="relative z-10 flex flex-col items-center">
+                                            {settings.logo && (
+                                                <img src={settings.logo} alt="Business Logo" className="h-24 w-auto object-contain mb-4 shadow-sm rounded-xl print:shadow-none" />
+                                            )}
+                                            {settings.title && (
+                                                <h1 className="text-4xl md:text-5xl font-serif font-extrabold text-slate-900 tracking-tight px-4">{settings.title}</h1>
+                                            )}
+                                            
+                                            <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm font-medium px-4">
+                                                {settings.address && (
+                                                    <span className="flex items-center gap-2 text-slate-600 bg-white/60 px-4 py-2 rounded-full border border-slate-200">
+                                                        <SvgIcon name="map-pin" className="w-4 h-4 text-rose-500" />
+                                                        {settings.address}
+                                                    </span>
+                                                )}
+                                                <div className="flex gap-2 print-hidden">
+                                                    {settings.whatsapp && (
+                                                        <a href={settings.whatsapp.startsWith('http') ? settings.whatsapp : `https://${settings.whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center bg-green-50 hover:bg-green-100 text-green-700 h-10 w-10 rounded-full border border-green-200 transition-colors" title="WhatsApp">
+                                                            <SvgIcon name="phone" className="w-5 h-5" />
+                                                        </a>
+                                                    )}
+                                                    {settings.instagram && (
+                                                        <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center bg-pink-50 hover:bg-pink-100 text-pink-700 h-10 w-10 rounded-full border border-pink-200 transition-colors" title="Instagram">
+                                                            <SvgIcon name="instagram" className="w-5 h-5" />
+                                                        </a>
+                                                    )}
+                                                    {settings.facebook && (
+                                                        <a href={settings.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 h-10 w-10 rounded-full border border-blue-200 transition-colors" title="Facebook">
+                                                            <SvgIcon name="facebook" className="w-5 h-5" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+
                                     {!isPrinting && visibleCatalogs.length > 0 && (
                                         <div className="mt-8 flex justify-center print-hidden">
-                                            <button onClick={handlePrint} className="bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-6 rounded-full flex items-center gap-2"><SvgIcon name="file-down" className="w-4 h-4" /> הורד כ-PDF</button>
+                                            <button onClick={handlePrint} className="bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-6 rounded-full flex items-center gap-2 transition-all"><SvgIcon name="file-down" className="w-4 h-4" /> הורד קטלוג כ-PDF</button>
                                         </div>
                                     )}
                                 </div>
 
                                 {!isPrinting && visibleCatalogs.length > 1 && (
-                                    <div className="flex flex-wrap justify-center gap-3 mb-12 print-hidden">
+                                    <div className="flex flex-wrap justify-center gap-3 mb-12 print-hidden px-4">
                                         {visibleCatalogs.map(catalog => (
                                             <button key={catalog.id} onClick={() => setActiveCatalogId(catalog.id)} className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${activeCatalogId === catalog.id ? 'bg-rose-600 text-white shadow-md scale-105' : 'bg-white text-slate-600 hover:bg-rose-100 border border-rose-100'}`}>{catalog.name}</button>
                                         ))}
