@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tali Design - קטלוג דיגיטלי</title>
     
-    <!-- Core External Dependencies (Synchronous Loading for Stability) -->
+    <!-- Core External Dependencies -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase UMD / Compat Libraries (Bypasses CORS/ESM issues in iFrames) -->
+    <!-- Firebase UMD -->
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
@@ -31,7 +31,6 @@
       }
     </script>
 
-    <!-- Physical Print Engine & Base CSS -->
     <style>
       body {
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -54,18 +53,14 @@
 </head>
 <body class="bg-gradient-to-br from-rose-50 to-orange-50 text-slate-900 selection:bg-rose-200">
 
-    <!-- Virtual DOM Mount Point -->
     <div id="root"></div>
 
-    <!-- Application Payload (Runtime Transpiled by Babel) -->
     <script type="text/babel">
-        // React Hooks Extraction
         const { useState, useEffect, useRef } = React;
 
         // ============================================================================
-        // === TELEMETRY & HARDWARE CONFIGURATION ===
+        // === TELEMETRY CONFIGURATION ===
         // ============================================================================
-        // API Key split for Github Secrets Scanner evasion
         const firebaseConfig = {
             apiKey: "AIzaSyAEx" + "aWN2D2qwnz7S" + "_8Rhv-djPsv18xONd8",
             authDomain: "tali-design.firebaseapp.com",
@@ -76,7 +71,6 @@
             measurementId: "G-G5ZFHS45JG"
         };
 
-        // Initialize Global Firebase Instances (UMD approach)
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -84,11 +78,10 @@
         // System Constants
         const SYS_APP_ID = 'tali-catalog-production';
 
-        // Abstracted Firestore Paths (Rule 1 compliance)
         const getCol = (colName) => db.collection(`artifacts/${SYS_APP_ID}/public/data/${colName}`);
         const getDoc = (colName, id) => db.doc(`artifacts/${SYS_APP_ID}/public/data/${colName}/${id}`);
 
-        // --- Hardware Accelerated Icon Renderer (Zero DOM-Mutation Conflicts) ---
+        // --- Hardware Accelerated Icon Renderer ---
         const SvgIcon = ({ name, className }) => {
             const paths = {
                 lock: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>,
@@ -101,7 +94,9 @@
                 'plus-circle': <><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></>,
                 image: <><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></>,
                 'file-down': <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="M9 15l3 3 3-3" /></>,
-                'external-link': <><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></>
+                'external-link': <><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></>,
+                'wifi': <><path d="M5 12.55a11 11 0 0 1 14.08 0" /><path d="M1.42 9a16 16 0 0 1 21.16 0" /><path d="M8.53 16.11a6 6 0 0 1 6.95 0" /><line x1="12" y1="20" x2="12.01" y2="20" /></>,
+                'wifi-off': <><line x1="2" y1="2" x2="22" y2="22" /><path d="M8.5 16.5a5 5 0 0 1 7 0" /><path d="M2 8.82a15 15 0 0 1 4.17-2.65" /><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76" /><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68" /><path d="M5 13a10 10 0 0 1 5.24-2.76" /><line x1="12" y1="20" x2="12.01" y2="20" /></>
             };
             return (
                 <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', width: '1em', height: '1em' }}>
@@ -117,28 +112,22 @@
             </svg>
         );
 
-        // ============================================================================
-        // === MAIN SYSTEM ARCHITECTURE ===
-        // ============================================================================
         function App() {
-            // --- IAM & State Routing ---
             const [user, setUser] = useState(null);
+            const [isOnline, setIsOnline] = useState(false);
             const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
             const [pinInput, setPinInput] = useState('');
             
-            // --- Environment State ---
             const [loading, setLoading] = useState(true);
             const [view, setView] = useState('catalog');
             const [adminTab, setAdminTab] = useState('products');
             const [isPrinting, setIsPrinting] = useState(false);
 
-            // --- Relational DB Matrix ---
             const [settings, setSettings] = useState({ title: 'TALI - קטלוג דיגיטלי', id: null });
             const [catalogs, setCatalogs] = useState([]);
             const [products, setProducts] = useState([]);
             const [activeCatalogId, setActiveCatalogId] = useState(null);
 
-            // --- Memory Buffers for Tx ---
             const [folderFormName, setFolderFormName] = useState('');
             const [siteTitleForm, setSiteTitleForm] = useState('');
             const [formData, setFormData] = useState({
@@ -147,34 +136,51 @@
             const [isSubmitting, setIsSubmitting] = useState(false);
             const fileInputRef = useRef(null);
 
-            // --- Rx (Receive) Telemetry Streams ---
+            // --- Auth & Connection Monitor ---
             useEffect(() => {
-                // Anonymous Handshake is mandatory for DB Rules
-                auth.signInAnonymously().catch(console.error);
-                const unsubscribe = auth.onAuthStateChanged(setUser);
+                auth.signInAnonymously()
+                    .then(() => setIsOnline(true))
+                    .catch((err) => {
+                        console.error('Critical Auth Failure:', err);
+                        setIsOnline(false);
+                        alert('כשל תקשורת לשרת Firebase: \n1. ודא ש-Anonymous Auth מופעל.\n2. חומת האש בארגון חוסמת את הבקשה.\n\nקוד שגיאה: ' + err.code);
+                    });
+                
+                const unsubscribe = auth.onAuthStateChanged(usr => {
+                    setUser(usr);
+                    setIsOnline(!!usr);
+                });
                 return () => unsubscribe();
             }, []);
 
+            // --- Rx Streams with Strict Error Handling ---
             useEffect(() => {
-                if (!user) return; // Strict gating (Rule 3)
+                if (!user) return;
 
-                // Stream 1: Settings
+                const handleRxError = (err) => {
+                    console.error("Firebase Rx Error:", err);
+                    setIsOnline(false);
+                    if(err.code === 'permission-denied') {
+                        alert("חסימה בערוץ הנתונים (Permission Denied)!\nעליך להגדיר את חוקי ה-Firestore בדיוק לפי ההוראות. המערכת עובדת כרגע ב-Offline Mode.");
+                    }
+                };
+
                 const unsubSettings = getCol('site_settings').onSnapshot((snapshot) => {
+                    setIsOnline(true);
                     if (!snapshot.empty) {
                         const docData = snapshot.docs[0];
                         setSettings({ id: docData.id, ...docData.data() });
                         setSiteTitleForm(docData.data().title || 'TALI - קטלוג דיגיטלי');
                     }
-                }, console.error);
+                }, handleRxError);
 
-                // Stream 2: Folders
                 const unsubCatalogs = getCol('catalogs').onSnapshot((snapshot) => {
+                    setIsOnline(true);
                     const items = [];
                     snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
                     items.sort((a, b) => a.timestamp - b.timestamp);
                     setCatalogs(items);
                     
-                    // Safe state injection to prevent stale closures
                     setActiveCatalogId(prev => {
                         if (!prev && items.length > 0) {
                             const firstVisible = items.find(c => c.isVisible);
@@ -182,26 +188,24 @@
                         }
                         return prev;
                     });
-                }, console.error);
+                }, handleRxError);
 
-                // Stream 3: Inventory
                 const unsubProducts = getCol('catalog_products').onSnapshot((snapshot) => {
+                    setIsOnline(true);
                     const items = [];
                     snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
                     items.sort((a, b) => b.timestamp - a.timestamp);
                     setProducts(items);
-                    setLoading(false); // Kill loader when payload arrived
-                }, console.error);
+                    setLoading(false);
+                }, handleRxError);
 
                 return () => {
                     unsubSettings();
                     unsubCatalogs();
                     unsubProducts();
                 };
-            // activeCatalogId removed from dependencies to prevent Phase Noise (re-subscriptions)
-            }, [user]); 
+            }, [user]);
 
-            // --- Auth Gateway ---
             const handlePinSubmit = (e) => {
                 e.preventDefault();
                 if (pinInput === '1234') {
@@ -212,7 +216,6 @@
                 }
             };
 
-            // --- DSP: Client-Side Image Resampling ---
             const handleImageUpload = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -222,7 +225,7 @@
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 800; // Limit to prevent 1MB limit crash
+                        const MAX_WIDTH = 800;
                         let width = img.width;
                         let height = img.height;
 
@@ -244,95 +247,108 @@
                 reader.readAsDataURL(file);
             };
 
-            // --- Tx (Transmit) Pipelines ---
+            // --- Tx Wrappers for Robust Error Handling ---
+            const txWrapper = async (txFunction, actionName) => {
+                if (!user || !isOnline) {
+                    alert('המערכת כרגע בסטטוס אופליין או שגיאת הרשאות. לא ניתן לבצע מניפולציות בנתונים.');
+                    return false;
+                }
+                setIsSubmitting(true);
+                try {
+                    await txFunction();
+                    return true;
+                } catch (err) {
+                    console.error(`Tx Error [${actionName}]:`, err);
+                    alert(`כשל בשמירת הנתונים בענן!\nהפעולה: ${actionName}\nקוד שגיאה: ${err.code}\n\nבדוק הרשאות מסד נתונים (Rules).`);
+                    return false;
+                } finally {
+                    setIsSubmitting(false);
+                }
+            };
+
             const updateSettings = async (e) => {
                 e.preventDefault();
                 if (!siteTitleForm) return;
-                setIsSubmitting(true);
-                try {
-                    if (settings.id) {
-                        await getDoc('site_settings', settings.id).update({ title: siteTitleForm });
-                    } else {
-                        await getCol('site_settings').add({ title: siteTitleForm });
-                    }
-                } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
+                await txWrapper(async () => {
+                    if (settings.id) await getDoc('site_settings', settings.id).update({ title: siteTitleForm });
+                    else await getCol('site_settings').add({ title: siteTitleForm });
+                }, 'עדכון כותרת');
             };
 
             const addFolder = async (e) => {
                 e.preventDefault();
                 if (!folderFormName) return;
-                setIsSubmitting(true);
-                try {
-                    await getCol('catalogs').add({
-                        name: folderFormName, isVisible: true, timestamp: Date.now()
-                    });
-                    setFolderFormName('');
-                } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
+                const success = await txWrapper(async () => {
+                    await getCol('catalogs').add({ name: folderFormName, isVisible: true, timestamp: Date.now() });
+                }, 'יצירת תיקייה');
+                if (success) setFolderFormName('');
             };
 
             const toggleFolderVisibility = async (id, currentVisibility) => {
-                try {
+                await txWrapper(async () => {
                     await getDoc('catalogs', id).update({ isVisible: !currentVisibility });
-                } catch (err) { console.error(err); }
+                }, 'שינוי תצוגת תיקייה');
             };
 
             const deleteFolder = async (id) => {
-                // Relational protection (Cascaded delete prevention)
                 const hasProducts = products.some(p => p.catalogId === id);
                 if (hasProducts) { alert('כשל לוגי: לא ניתן למחוק תיקייה המכילה מוצרים.'); return; }
-                try {
+                const success = await txWrapper(async () => {
                     await getDoc('catalogs', id).delete();
-                    if (activeCatalogId === id) setActiveCatalogId(null);
-                } catch (err) { console.error(err); }
+                }, 'מחיקת תיקייה');
+                if (success && activeCatalogId === id) setActiveCatalogId(null);
             };
 
             const handleProductSubmit = async (e) => {
                 e.preventDefault();
                 if (!formData.title || !formData.image || !formData.catalogId) return;
-                setIsSubmitting(true);
-                try {
+                const success = await txWrapper(async () => {
                     await getCol('catalog_products').add({ ...formData, timestamp: Date.now() });
+                }, 'הוספת מוצר חדש');
+                
+                if (success) {
                     setFormData({ catalogId: formData.catalogId, title: '', description: '', price: '', link: '', image: null });
                     if (fileInputRef.current) fileInputRef.current.value = '';
-                } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
+                }
             };
 
             const deleteProduct = async (id) => {
-                try { await getDoc('catalog_products', id).delete(); } catch (err) { console.error(err); }
+                await txWrapper(async () => {
+                    await getDoc('catalog_products', id).delete(); 
+                }, 'מחיקת מוצר');
             };
 
-            // --- OS Print Interrupt ---
             const handlePrint = () => {
                 setIsPrinting(true);
                 setTimeout(() => {
                     window.print();
                     setIsPrinting(false);
-                }, 500); // 500ms delay ensures Virtual DOM commits to Physical DOM before OS reads it
+                }, 500);
             };
 
-            // --- Pre-flight Checks & Layout ---
             if (loading) {
                 return (
                     <div className="flex h-screen w-full items-center justify-center bg-rose-50 dir-rtl">
-                        <LoaderIcon />
+                        <div className="text-center">
+                            <LoaderIcon />
+                            <p className="mt-4 text-slate-600 font-medium tracking-wide">מסנכרן נתונים מול ענן Firebase...</p>
+                        </div>
                     </div>
                 );
             }
 
-            // O(N) Join processing in memory
             const visibleCatalogs = catalogs.filter(c => c.isVisible);
             const displayedProducts = products.filter(p => p.catalogId === activeCatalogId);
 
             return (
-                <div className="min-h-screen relative">
+                <div className="min-h-screen relative pb-10">
                     
-                    {/* Navigation layer */}
                     {!isPrinting && (
                         <nav className="bg-white/90 backdrop-blur-md shadow-sm border-b border-rose-100 sticky top-0 z-50 print-hidden">
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                                 <div className="flex justify-between h-16 items-center">
                                     <h1 className="text-xl font-serif font-bold text-slate-800 tracking-tight">{settings.title}</h1>
-                                    <div className="flex space-x-2 space-x-reverse">
+                                    <div className="flex space-x-2 space-x-reverse items-center">
                                         <button onClick={() => { setView('catalog'); setIsAdminAuthenticated(false); }} className={`px-4 py-2 rounded-md transition-colors font-medium ${view === 'catalog' ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-600 hover:bg-rose-50'}`}>תצוגת לקוח</button>
                                         <button onClick={() => setView('admin')} className={`px-4 py-2 rounded-md transition-colors font-medium flex items-center gap-2 ${view === 'admin' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
                                             <SvgIcon name="settings" className="w-4 h-4" /> ניהול
@@ -341,6 +357,19 @@
                                 </div>
                             </div>
                         </nav>
+                    )}
+
+                    {view === 'admin' && !isPrinting && (
+                        <div className="bg-slate-900 text-slate-300 text-xs py-1 px-4 flex justify-between items-center print-hidden">
+                            <span>Telemetry Status:</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-mono">{user ? `UID: ${user.uid.slice(0,6)}...` : 'Unauthenticated'}</span>
+                                {isOnline ? 
+                                    <span className="flex items-center text-green-400 gap-1"><SvgIcon name="wifi" className="w-3 h-3" /> Online Tx/Rx</span> : 
+                                    <span className="flex items-center text-red-400 gap-1"><SvgIcon name="wifi-off" className="w-3 h-3" /> Offline (DB Sync Failed)</span>
+                                }
+                            </div>
+                        </div>
                     )}
 
                     <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isPrinting ? 'print-mode' : ''}`}>
@@ -357,7 +386,7 @@
                                         <p className="text-slate-500 mb-6">הזן סיסמה (1234)</p>
                                         <form onSubmit={handlePinSubmit} className="space-y-4">
                                             <input type="password" value={pinInput} onChange={(e) => setPinInput(e.target.value)} placeholder="..." className="w-full text-center text-2xl tracking-widest p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none" autoFocus />
-                                            <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-4 rounded-xl transition-all">כניסה</button>
+                                            <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-4 rounded-xl transition-all">כניסה למערכת</button>
                                         </form>
                                     </div>
                                 ) : (
@@ -374,7 +403,9 @@
                                                 <h3 className="text-xl font-bold mb-6 flex items-center text-slate-800"><SvgIcon name="edit-2" className="ml-2 w-5 h-5 text-rose-500" /> כותרת ראשית</h3>
                                                 <form onSubmit={updateSettings} className="space-y-4">
                                                     <input type="text" value={siteTitleForm} onChange={(e) => setSiteTitleForm(e.target.value)} className="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500" />
-                                                    <button type="submit" disabled={isSubmitting} className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-8 rounded-xl disabled:opacity-50">שמור</button>
+                                                    <button type="submit" disabled={isSubmitting} className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-8 rounded-xl disabled:opacity-50">
+                                                        {isSubmitting ? 'מעדכן...' : 'שמור'}
+                                                    </button>
                                                 </form>
                                             </div>
                                         )}
@@ -385,11 +416,13 @@
                                                     <h3 className="text-lg font-bold mb-4">יצירת תיקייה חדשה</h3>
                                                     <form onSubmit={addFolder} className="space-y-4">
                                                         <input type="text" placeholder="שם התיקייה" value={folderFormName} onChange={(e) => setFolderFormName(e.target.value)} className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500" />
-                                                        <button type="submit" disabled={isSubmitting || !folderFormName} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg">הוסף תיקייה</button>
+                                                        <button type="submit" disabled={isSubmitting || !folderFormName} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg">
+                                                            {isSubmitting ? 'שומר...' : 'הוסף תיקייה'}
+                                                        </button>
                                                     </form>
                                                 </div>
                                                 <div className="md:col-span-2 space-y-3">
-                                                    {catalogs.length === 0 ? <div className="p-8 text-center text-slate-400 bg-white/50 rounded-2xl border border-dashed">אין תיקיות</div> : catalogs.map(catalog => (
+                                                    {catalogs.length === 0 ? <div className="p-8 text-center text-slate-400 bg-white/50 rounded-2xl border border-dashed">אין תיקיות במערכת</div> : catalogs.map(catalog => (
                                                         <div key={catalog.id} className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm">
                                                             <div className="flex items-center gap-3">
                                                                 <SvgIcon name="folder" className={`w-5 h-5 ${catalog.isVisible ? 'text-rose-500' : 'text-slate-400'}`} />
@@ -412,7 +445,7 @@
                                                 <div className="lg:col-span-1">
                                                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 sticky top-24">
                                                         <h2 className="text-lg font-bold mb-6 flex items-center text-slate-800"><SvgIcon name="plus-circle" className="ml-2 w-5 h-5 text-rose-500" /> הוספת מוצר</h2>
-                                                        {catalogs.length === 0 ? ( <div className="text-red-500 text-sm font-medium p-4 bg-red-50 rounded-lg">צור תיקייה קודם</div>) : (
+                                                        {catalogs.length === 0 ? ( <div className="text-red-500 text-sm font-medium p-4 bg-red-50 rounded-lg">צור תיקייה קודם במסך 'קטלוגים'</div>) : (
                                                             <form onSubmit={handleProductSubmit} className="space-y-4">
                                                                 <select value={formData.catalogId} onChange={(e) => setFormData({...formData, catalogId: e.target.value})} required className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500">
                                                                     <option value="" disabled>-- בחר קטלוג --</option>
@@ -420,7 +453,7 @@
                                                                 </select>
                                                                 <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
                                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                        {formData.image ? <span className="text-sm text-green-600 font-medium">✓ תמונה נטענה</span> : <><SvgIcon name="image" className="w-8 h-8 text-slate-400 mb-2" /><span className="text-sm text-slate-500">לחץ להעלאת תמונה</span></>}
+                                                                        {formData.image ? <span className="text-sm text-green-600 font-medium">✓ תמונה נטענה בהצלחה</span> : <><SvgIcon name="image" className="w-8 h-8 text-slate-400 mb-2" /><span className="text-sm text-slate-500">לחץ להעלאת תמונה</span></>}
                                                                     </div>
                                                                     <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} ref={fileInputRef} />
                                                                 </label>
@@ -430,7 +463,9 @@
                                                                     <input type="text" placeholder="מחיר (₪)" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500" />
                                                                     <input type="url" placeholder="קישור: https://" value={formData.link} onChange={(e) => setFormData({...formData, link: e.target.value})} className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 text-left" dir="ltr" />
                                                                 </div>
-                                                                <button type="submit" disabled={isSubmitting || !formData.title || !formData.image || !formData.catalogId} className="w-full mt-4 bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl disabled:opacity-50">שמור מוצר</button>
+                                                                <button type="submit" disabled={isSubmitting || !formData.title || !formData.image || !formData.catalogId} className="w-full mt-4 bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl disabled:opacity-50">
+                                                                    {isSubmitting ? 'משדר נתונים...' : 'שמור מוצר'}
+                                                                </button>
                                                             </form>
                                                         )}
                                                     </div>
@@ -516,14 +551,14 @@
                                 {visibleCatalogs.length === 0 && !isPrinting && (
                                     <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white/50 rounded-3xl border border-dashed border-rose-200">
                                         <SvgIcon name="folder" className="w-16 h-16 mb-4 opacity-50 text-rose-300" />
-                                        <p className="text-xl font-medium">אין קטלוגים זמינים.</p>
+                                        <p className="text-xl font-medium">אין קטלוגים פתוחים לקהל כרגע.</p>
                                     </div>
                                 )}
                                 
                                 {visibleCatalogs.length > 0 && displayedProducts.length === 0 && !isPrinting && (
                                     <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white/50 rounded-3xl border border-dashed border-rose-200">
                                         <SvgIcon name="image" className="w-16 h-16 mb-4 opacity-50 text-rose-300" />
-                                        <p className="text-xl font-medium">הקטלוג ריק.</p>
+                                        <p className="text-xl font-medium">אין מוצרים בקטלוג זה.</p>
                                     </div>
                                 )}
                             </div>
@@ -533,7 +568,6 @@
             );
         }
 
-        // --- Render Initialization ---
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
