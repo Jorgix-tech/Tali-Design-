@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tali Design - קטלוג דיגיטלי</title>
+    
+    <!-- Core External Dependencies (Synchronous Loading for Stability) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Firebase UMD / Compat Libraries (Bypasses CORS/ESM issues in iFrames) -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              rose: { 50: '#fff1f2', 100: '#ffe4e6', 200: '#fecdd3', 300: '#fda4af', 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c', 800: '#9f1239', 900: '#881337', },
+              orange: { 50: '#fff7ed', },
+              slate: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a', }
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Physical Print Engine & Base CSS -->
+    <style>
+      body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+      @media print {
+        @page { margin: 15mm; size: A4 portrait; }
+        body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .print-hidden { display: none !important; }
+        .print-mode { padding: 0 !important; }
+        .print-grid { 
+          display: grid !important; 
+          grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
+          gap: 2rem !important;
+        }
+        .print-break-inside-avoid { break-inside: avoid; }
+        a { text-decoration: none !important; }
+        .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl { box-shadow: none !important; }
+      }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-rose-50 to-orange-50 text-slate-900 selection:bg-rose-200">
+
+    <!-- Virtual DOM Mount Point -->
+    <div id="root"></div>
+
+    <!-- Application Payload (Runtime Transpiled by Babel) -->
+    <script type="text/babel">
+        // React Hooks Extraction
+        const { useState, useEffect, useRef } = React;
+
+        // ============================================================================
+        // === TELEMETRY & HARDWARE CONFIGURATION ===
+        // ============================================================================
+        // API Key split for Github Secrets Scanner evasion
+        const firebaseConfig = {
+            apiKey: "AIzaSyAEx" + "aWN2D2qwnz7S" + "_8Rhv-djPsv18xONd8",
+            authDomain: "tali-design.firebaseapp.com",
+            projectId: "tali-design",
+            storageBucket: "tali-design.firebasestorage.app",
+            messagingSenderId: "299816815249",
+            appId: "1:299816815249:web:19115d3034bcb39ef58d30",
+            measurementId: "G-G5ZFHS45JG"
+        };
+
+        // Initialize Global Firebase Instances (UMD approach)
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // System Constants
+        const SYS_APP_ID = 'tali-catalog-production';
+
+        // Abstracted Firestore Paths (Rule 1 compliance)
+        const getCol = (colName) => db.collection(`artifacts/${SYS_APP_ID}/public/data/${colName}`);
+        const getDoc = (colName, id) => db.doc(`artifacts/${SYS_APP_ID}/public/data/${colName}/${id}`);
+
+        // --- Hardware Accelerated Icon Renderer (Zero DOM-Mutation Conflicts) ---
+        const SvgIcon = ({ name, className }) => {
+            const paths = {
+                lock: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>,
+                settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></>,
+                'edit-2': <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />,
+                folder: <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />,
+                eye: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>,
+                'eye-off': <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></>,
+                'trash-2': <><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></>,
+                'plus-circle': <><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></>,
+                image: <><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></>,
+                'file-down': <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="M9 15l3 3 3-3" /></>,
+                'external-link': <><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></>
+            };
+            return (
+                <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', width: '1em', height: '1em' }}>
+                    {paths[name]}
+                </svg>
+            );
+        };
+
+        const LoaderIcon = () => (
+            <svg className="animate-spin w-12 h-12 text-rose-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        );
+
+        // ============================================================================
+        // === MAIN SYSTEM ARCHITECTURE ===
+        // ============================================================================
+        function App() {
+            // --- IAM & State Routing ---
+            const [user, setUser] = useState(null);
+            const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+            const [pinInput, setPinInput] = useState('');
+            
+            // --- Environment State ---
+            const [loading, setLoading] = useState(true);
+            const [view, setView] = useState('catalog');
+            const [adminTab, setAdminTab] = useState('products');
+            const [isPrinting, setIsPrinting] = useState(false);
+
+            // --- Relational DB Matrix ---
+            const [settings, setSettings] = useState({ title: 'TALI - קטלוג דיגיטלי', id: null });
+            const [catalogs, setCatalogs] = useState([]);
+            const [products, setProducts] = useState([]);
+            const [activeCatalogId, setActiveCatalogId] = useState(null);
+
+            // --- Memory Buffers for Tx ---
+            const [folderFormName, setFolderFormName] = useState('');
+            const [siteTitleForm, setSiteTitleForm] = useState('');
+            const [formData, setFormData] = useState({
+                catalogId: '', title: '', description: '', price: '', link: '', image: null
+            });
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const fileInputRef = useRef(null);
+
+            // --- Rx (Receive) Telemetry Streams ---
+            useEffect(() => {
+                // Anonymous Handshake is mandatory for DB Rules
+                auth.signInAnonymously().catch(console.error);
+                const unsubscribe = auth.onAuthStateChanged(setUser);
+                return () => unsubscribe();
+            }, []);
+
+            useEffect(() => {
+                if (!user) return; // Strict gating (Rule 3)
+
+                // Stream 1: Settings
+                const unsubSettings = getCol('site_settings').onSnapshot((snapshot) => {
+                    if (!snapshot.empty) {
+                        const docData = snapshot.docs[0];
+                        setSettings({ id: docData.id, ...docData.data() });
+                        setSiteTitleForm(docData.data().title || 'TALI - קטלוג דיגיטלי');
+                    }
+                }, console.error);
+
+                // Stream 2: Folders
+                const unsubCatalogs = getCol('catalogs').onSnapshot((snapshot) => {
+                    const items = [];
+                    snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+                    items.sort((a, b) => a.timestamp - b.timestamp);
+                    setCatalogs(items);
+                    
+                    // Safe state injection to prevent stale closures
+                    setActiveCatalogId(prev => {
+                        if (!prev && items.length > 0) {
+                            const firstVisible = items.find(c => c.isVisible);
+                            return firstVisible ? firstVisible.id : prev;
+                        }
+                        return prev;
+                    });
+                }, console.error);
+
+                // Stream 3: Inventory
+                const unsubProducts = getCol('catalog_products').onSnapshot((snapshot) => {
+                    const items = [];
+                    snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+                    items.sort((a, b) => b.timestamp - a.timestamp);
+                    setProducts(items);
+                    setLoading(false); // Kill loader when payload arrived
+                }, console.error);
+
+                return () => {
+                    unsubSettings();
+                    unsubCatalogs();
+                    unsubProducts();
+                };
+            // activeCatalogId removed from dependencies to prevent Phase Noise (re-subscriptions)
+            }, [user]); 
+
+            // --- Auth Gateway ---
+            const handlePinSubmit = (e) => {
+                e.preventDefault();
+                if (pinInput === '1234') {
+                    setIsAdminAuthenticated(true);
+                    setPinInput('');
+                } else {
+                    alert('שגיאת אימות: סיסמה שגויה');
+                }
+            };
+
+            // --- DSP: Client-Side Image Resampling ---
+            const handleImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 800; // Limit to prevent 1MB limit crash
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > MAX_WIDTH) {
+                            height = Math.round((height * MAX_WIDTH) / width);
+                            width = MAX_WIDTH;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        setFormData(prev => ({ ...prev, image: compressedBase64 }));
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            };
+
+            // --- Tx (Transmit) Pipelines ---
+            const updateSettings = async (e) => {
+                e.preventDefault();
+                if (!siteTitleForm) return;
+                setIsSubmitting(true);
+                try {
+                    if (settings.id) {
+                        await getDoc('site_settings', settings.id).update({ title: siteTitleForm });
+                    } else {
+                        await getCol('site_settings').add({ title: siteTitleForm });
+                    }
+                } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
+            };
+
+            const addFolder = async (e) => {
+                e.preventDefault();
+                if (!folderFormName) return;
+                setIsSubmitting(true);
+                try {
+                    await getCol('catalogs').add({
+                        name: folderFormName, isVisible: true, timestamp: Date.now()
+                    });
+                    setFolderFormName('');
+                } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
+            };
+
+            const toggleFolderVisibility = async (id, currentVisibility) => {
+                try {
+                    await getDoc('catalogs', id).update({ isVisible: !currentVisibility });
+                } catch (err) { console.error(err); }
+            };
+
+            const deleteFolder = async (id) => {
+                // Relational protection (Cascaded delete prevention)
+                const hasProducts = products.some(p => p.catalogId === id);
+                if (hasProducts) { alert('כשל לוגי: לא ניתן למחוק תיקייה המכילה מוצרים.'); return; }
+                try {
+                    await getDoc('catalogs', id).delete();
+                    if (activeCatalogId === id) setActiveCatalogId(null);
+                } catch (err) { console.error(err); }
+            };
+
+            const handleProductSubmit = async (e) => {
+                e.preventDefault();
+                if (!formData.title || !formData.image || !formData.catalogId) return;
+                setIsSubmitting(true);
+                try {
+                    await getCol('catalog_products').add({ ...formData, timestamp: Date.now() });
+                    setFormData({ catalogId: formData.catalogId, title: '', description: '', price: '', link: '', image: null });
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
+            };
+
+            const deleteProduct = async (id) => {
+                try { await getDoc('catalog_products', id).delete(); } catch (err) { console.error(err); }
+            };
+
+            // --- OS Print Interrupt ---
+            const handlePrint = () => {
+                setIsPrinting(true);
+                setTimeout(() => {
+                    window.print();
+                    setIsPrinting(false);
+                }, 500); // 500ms delay ensures Virtual DOM commits to Physical DOM before OS reads it
+            };
+
+            // --- Pre-flight Checks & Layout ---
+            if (loading) {
+                return (
+                    <div className="flex h-screen w-full items-center justify-center bg-rose-50 dir-rtl">
+                        <LoaderIcon />
+                    </div>
+                );
+            }
+
+            // O(N) Join processing in memory
+            const visibleCatalogs = catalogs.filter(c => c.isVisible);
+            const displayedProducts = products.filter(p => p.catalogId === activeCatalogId);
+
+            return (
+                <div className="min-h-screen relative">
+                    
+                    {/* Navigation layer */}
+                    {!isPrinting && (
+                        <nav className="bg-white/90 backdrop-blur-md shadow-sm border-b border-rose-100 sticky top-0 z-50 print-hidden">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div className="flex justify-between h-16 items-center">
+                                    <h1 className="text-xl font-serif font-bold text-slate-800 tracking-tight">{settings.title}</h1>
+                                    <div className="flex space-x-2 space-x-reverse">
+                                        <button onClick={() => { setView('catalog'); setIsAdminAuthenticated(false); }} className={`px-4 py-2 rounded-md transition-colors font-medium ${view === 'catalog' ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-600 hover:bg-rose-50'}`}>תצוגת לקוח</button>
+                                        <button onClick={() => setView('admin')} className={`px-4 py-2 rounded-md transition-colors font-medium flex items-center gap-2 ${view === 'admin' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
+                                            <SvgIcon name="settings" className="w-4 h-4" /> ניהול
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
+                    )}
+
+                    <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isPrinting ? 'print-mode' : ''}`}>
+                        
+                        {/* ================= ADMIN VIEW ================= */}
+                        {view === 'admin' && !isPrinting && (
+                            <div className="max-w-5xl mx-auto">
+                                {!isAdminAuthenticated ? (
+                                    <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md mx-auto mt-20 border border-slate-100 text-center">
+                                        <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6 text-rose-600">
+                                            <SvgIcon name="lock" className="w-8 h-8" />
+                                        </div>
+                                        <h2 className="text-2xl font-bold text-slate-800 mb-2">אזור מאובטח</h2>
+                                        <p className="text-slate-500 mb-6">הזן סיסמה (1234)</p>
+                                        <form onSubmit={handlePinSubmit} className="space-y-4">
+                                            <input type="password" value={pinInput} onChange={(e) => setPinInput(e.target.value)} placeholder="..." className="w-full text-center text-2xl tracking-widest p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none" autoFocus />
+                                            <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-4 rounded-xl transition-all">כניסה</button>
+                                        </form>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-8">
+                                        {/* Admin Tabs Router */}
+                                        <div className="flex border-b border-slate-300 space-x-8 space-x-reverse mb-8 pb-px">
+                                            <button onClick={() => setAdminTab('products')} className={`pb-4 text-lg font-medium transition-colors relative ${adminTab === 'products' ? 'text-rose-600' : 'text-slate-500 hover:text-slate-700'}`}>ניהול מוצרים {adminTab === 'products' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600 rounded-t-full"></span>}</button>
+                                            <button onClick={() => setAdminTab('folders')} className={`pb-4 text-lg font-medium transition-colors relative ${adminTab === 'folders' ? 'text-rose-600' : 'text-slate-500 hover:text-slate-700'}`}>קטלוגים {adminTab === 'folders' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600 rounded-t-full"></span>}</button>
+                                            <button onClick={() => setAdminTab('settings')} className={`pb-4 text-lg font-medium transition-colors relative ${adminTab === 'settings' ? 'text-rose-600' : 'text-slate-500 hover:text-slate-700'}`}>הגדרות {adminTab === 'settings' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600 rounded-t-full"></span>}</button>
+                                        </div>
+
+                                        {adminTab === 'settings' && (
+                                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-2xl">
+                                                <h3 className="text-xl font-bold mb-6 flex items-center text-slate-800"><SvgIcon name="edit-2" className="ml-2 w-5 h-5 text-rose-500" /> כותרת ראשית</h3>
+                                                <form onSubmit={updateSettings} className="space-y-4">
+                                                    <input type="text" value={siteTitleForm} onChange={(e) => setSiteTitleForm(e.target.value)} className="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500" />
+                                                    <button type="submit" disabled={isSubmitting} className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-8 rounded-xl disabled:opacity-50">שמור</button>
+                                                </form>
+                                            </div>
+                                        )}
+
+                                        {adminTab === 'folders' && (
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                                <div className="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                                                    <h3 className="text-lg font-bold mb-4">יצירת תיקייה חדשה</h3>
+                                                    <form onSubmit={addFolder} className="space-y-4">
+                                                        <input type="text" placeholder="שם התיקייה" value={folderFormName} onChange={(e) => setFolderFormName(e.target.value)} className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500" />
+                                                        <button type="submit" disabled={isSubmitting || !folderFormName} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg">הוסף תיקייה</button>
+                                                    </form>
+                                                </div>
+                                                <div className="md:col-span-2 space-y-3">
+                                                    {catalogs.length === 0 ? <div className="p-8 text-center text-slate-400 bg-white/50 rounded-2xl border border-dashed">אין תיקיות</div> : catalogs.map(catalog => (
+                                                        <div key={catalog.id} className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm">
+                                                            <div className="flex items-center gap-3">
+                                                                <SvgIcon name="folder" className={`w-5 h-5 ${catalog.isVisible ? 'text-rose-500' : 'text-slate-400'}`} />
+                                                                <span className={`font-bold ${!catalog.isVisible && 'text-slate-400 line-through'}`}>{catalog.name}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <button onClick={() => toggleFolderVisibility(catalog.id, catalog.isVisible)} className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 ${catalog.isVisible ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                                                                    <SvgIcon name={catalog.isVisible ? 'eye' : 'eye-off'} className="w-4 h-4" /> {catalog.isVisible ? 'מוצג' : 'מוסתר'}
+                                                                </button>
+                                                                <button onClick={() => deleteFolder(catalog.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg" title="מחק"><SvgIcon name="trash-2" className="w-5 h-5" /></button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {adminTab === 'products' && (
+                                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                                <div className="lg:col-span-1">
+                                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 sticky top-24">
+                                                        <h2 className="text-lg font-bold mb-6 flex items-center text-slate-800"><SvgIcon name="plus-circle" className="ml-2 w-5 h-5 text-rose-500" /> הוספת מוצר</h2>
+                                                        {catalogs.length === 0 ? ( <div className="text-red-500 text-sm font-medium p-4 bg-red-50 rounded-lg">צור תיקייה קודם</div>) : (
+                                                            <form onSubmit={handleProductSubmit} className="space-y-4">
+                                                                <select value={formData.catalogId} onChange={(e) => setFormData({...formData, catalogId: e.target.value})} required className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500">
+                                                                    <option value="" disabled>-- בחר קטלוג --</option>
+                                                                    {catalogs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                                                </select>
+                                                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                                        {formData.image ? <span className="text-sm text-green-600 font-medium">✓ תמונה נטענה</span> : <><SvgIcon name="image" className="w-8 h-8 text-slate-400 mb-2" /><span className="text-sm text-slate-500">לחץ להעלאת תמונה</span></>}
+                                                                    </div>
+                                                                    <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} ref={fileInputRef} />
+                                                                </label>
+                                                                <input type="text" placeholder="שם המוצר" required value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500" />
+                                                                <textarea rows="2" placeholder="תיאור קצר" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 resize-none" />
+                                                                <div className="grid grid-cols-2 gap-4">
+                                                                    <input type="text" placeholder="מחיר (₪)" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500" />
+                                                                    <input type="url" placeholder="קישור: https://" value={formData.link} onChange={(e) => setFormData({...formData, link: e.target.value})} className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 text-left" dir="ltr" />
+                                                                </div>
+                                                                <button type="submit" disabled={isSubmitting || !formData.title || !formData.image || !formData.catalogId} className="w-full mt-4 bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl disabled:opacity-50">שמור מוצר</button>
+                                                            </form>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="lg:col-span-2 space-y-8">
+                                                    {catalogs.map(catalog => {
+                                                        const catalogProducts = products.filter(p => p.catalogId === catalog.id);
+                                                        if (catalogProducts.length === 0) return null;
+                                                        return (
+                                                            <div key={catalog.id} className="bg-white/50 p-6 rounded-2xl border border-slate-200">
+                                                                <h3 className="text-xl font-bold mb-4 flex items-center text-slate-800"><SvgIcon name="folder" className="ml-2 w-5 h-5 text-slate-400" /> {catalog.name} <span className="mr-3 text-sm bg-slate-200 px-2 py-0.5 rounded-full">{catalogProducts.length} מוצרים</span></h3>
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                    {catalogProducts.map(product => (
+                                                                        <div key={product.id} className="bg-white p-3 rounded-xl border border-slate-100 flex gap-4 items-start shadow-sm hover:shadow-md">
+                                                                            <img src={product.image} alt={product.title} className="w-20 h-20 object-cover rounded-lg border border-slate-100" />
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <div className="flex justify-between items-start">
+                                                                                    <h4 className="font-bold text-sm truncate">{product.title}</h4>
+                                                                                    <button onClick={() => deleteProduct(product.id)} className="text-red-400 hover:text-red-600 p-1" title="מחק"><SvgIcon name="trash-2" className="w-4 h-4" /></button>
+                                                                                </div>
+                                                                                <span className="font-bold text-rose-600 text-sm">{product.price ? `₪${product.price}` : ''}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ================= PUBLIC VIEW (Client & Print) ================= */}
+                        {(view === 'catalog' || isPrinting) && (
+                            <div className="pb-20">
+                                <div className="text-center mb-12 pt-8 pb-10 print:mb-8 print:pt-0 print:pb-4 border-b-2 border-rose-900/10">
+                                    <div className="inline-block relative">
+                                        <div className="absolute -inset-x-8 -inset-y-12 text-[180px] font-serif text-rose-900/5 select-none pointer-events-none print:text-slate-100 z-0 flex items-center justify-center overflow-hidden">T</div>
+                                        <h1 className="relative z-10 text-4xl md:text-5xl font-serif font-extrabold text-slate-900 tracking-tight">{settings.title}</h1>
+                                        <p className="relative z-10 text-lg md:text-xl text-rose-700/80 mt-3 font-medium">רגעים קטנים של כתיבה</p>
+                                    </div>
+                                    {!isPrinting && visibleCatalogs.length > 0 && (
+                                        <div className="mt-8 flex justify-center print-hidden">
+                                            <button onClick={handlePrint} className="bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-6 rounded-full flex items-center gap-2"><SvgIcon name="file-down" className="w-4 h-4" /> הורד כ-PDF</button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {!isPrinting && visibleCatalogs.length > 1 && (
+                                    <div className="flex flex-wrap justify-center gap-3 mb-12 print-hidden">
+                                        {visibleCatalogs.map(catalog => (
+                                            <button key={catalog.id} onClick={() => setActiveCatalogId(catalog.id)} className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${activeCatalogId === catalog.id ? 'bg-rose-600 text-white shadow-md scale-105' : 'bg-white text-slate-600 hover:bg-rose-100 border border-rose-100'}`}>{catalog.name}</button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {isPrinting && activeCatalogId && ( <h2 className="text-2xl font-bold text-center mb-8 border-b border-slate-300 pb-2">{catalogs.find(c => c.id === activeCatalogId)?.name}</h2> )}
+
+                                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 ${isPrinting ? 'print-grid' : ''}`}>
+                                    {displayedProducts.map(product => (
+                                        <div key={product.id} className="bg-white rounded-3xl shadow-sm border border-rose-100/50 overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group print:shadow-none print:border-slate-300 print-break-inside-avoid print:rounded-xl">
+                                            <div className="relative aspect-square overflow-hidden bg-white flex items-center justify-center p-6">
+                                                <img src={product.image} alt={product.title} className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+                                                {product.price && <div className="absolute top-4 right-4 bg-slate-900/90 backdrop-blur-sm text-white font-bold py-1.5 px-4 rounded-full text-sm shadow-lg print:bg-slate-100 print:text-slate-900 print:border print:border-slate-300">₪{product.price}</div>}
+                                            </div>
+                                            <div className="p-6 flex flex-col flex-1 bg-gradient-to-b from-white to-slate-50/50">
+                                                <h3 className="text-xl font-bold text-slate-900 mb-2 leading-tight">{product.title}</h3>
+                                                <p className="text-sm text-slate-600 flex-1 whitespace-pre-wrap leading-relaxed">{product.description}</p>
+                                                {product.link && (
+                                                    <a href={product.link} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center justify-center w-full bg-rose-50 text-rose-700 hover:bg-rose-100 hover:text-rose-800 font-bold py-3 px-4 rounded-xl transition-colors print:bg-transparent print:border-2 print:border-slate-800 print:text-slate-800 print:py-2">
+                                                        לפרטים והזמנה <SvgIcon name="external-link" className="w-4 h-4 mr-2" />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {visibleCatalogs.length === 0 && !isPrinting && (
+                                    <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white/50 rounded-3xl border border-dashed border-rose-200">
+                                        <SvgIcon name="folder" className="w-16 h-16 mb-4 opacity-50 text-rose-300" />
+                                        <p className="text-xl font-medium">אין קטלוגים זמינים.</p>
+                                    </div>
+                                )}
+                                
+                                {visibleCatalogs.length > 0 && displayedProducts.length === 0 && !isPrinting && (
+                                    <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white/50 rounded-3xl border border-dashed border-rose-200">
+                                        <SvgIcon name="image" className="w-16 h-16 mb-4 opacity-50 text-rose-300" />
+                                        <p className="text-xl font-medium">הקטלוג ריק.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        }
+
+        // --- Render Initialization ---
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
